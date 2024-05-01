@@ -4,7 +4,8 @@ class User {
         this.username = username;
         this.email = email;
         this.password = password;
-        this.shoppingCart = {items:[],totalCost:0};
+        this.shoppingCart = { items: [], totalCost: 0 }
+        this.orders = [];
 
     }
     logIn(users) {
@@ -82,7 +83,7 @@ class User {
         setItemsToLocalStorage(users, "users");
     }
     
-    browseInfo(user) {
+    showUserInofrmation(user) {
         alert(`username: ${user.username}\n Email: ${user.email}\n Password: ${user.password}`)
     }
 

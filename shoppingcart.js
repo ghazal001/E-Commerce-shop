@@ -101,25 +101,136 @@ class ShoppingCart {
             }
         }
 
-    // calculateTotalCost() {
-    //     this.totalCost = this.items.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+    // placeOrder(userIndex,users,products){
+    //     let totalCost = users[userIndex].shoppingCart.totalCost;
+    //     let history = users[userIndex].shoppingCart.history;
+    //     let requiredProducts = users[userIndex].shoppingCart.items;
+        
+    //     for (let i = 0; i < requiredProducts.length; i++) {
+    //         const item = requiredProducts[i];
+    //         const productId = item.product.id;
+    //         const requiredQuantity = item.requiredQuantity;
+    //         const productIndex = products.findIndex(product => product.id === productId);
+            
+    //         // If the product is not available or its quantity exceeds the available stock, remove it from the order
+    //         if (productIndex === -1 || products[productIndex].isOnSale === "0") {
+    //             alert(`${item.product.name} is not available in the store anymore. It will be removed from the order.`);
+    //             users[userIndex].shoppingCart.items.splice(i, 1);
+    //             users[userIndex].shoppingCart.totalCost -= requiredQuantity * item.product.price
+    //             totalCost -= requiredQuantity * item.product.price
+    //             i--;
+    //             if (requiredProducts.length == 0) {
+    //                 alert("There are no products in the Shopping Cart anymore!")
+    //                 break
+    //             }
+    //         } else {
+    //             const product = products[productIndex];
+    //             let oldQuantity = requiredQuantity
+    //             // Prompt the user for a valid quantity if the entered quantity is invalid
+    //             while (isNaN(requiredQuantity) || requiredQuantity <= 0 || requiredQuantity > product.quantity) {
+    //                 alert(`The quantity of the ${product.name} is more than in the store currently. Please enter a valid quantity.`);
+    //                 requiredQuantity = parseInt(prompt(`Enter quantity for ${product.name}:`));
+    //             }
+    //             // Update the product quantity and total cost based on the updated quantity
+    //             product.quantity -= requiredQuantity;
+    //             if (oldQuantity != requiredQuantity) {
+    //                 totalCost -= (product.price * oldQuantity);
+    //                 totalCost += (product.price * requiredQuantity);
+    //             }
+    //         }
+    //     }
+    //     // Apply discount if the total cost is more than 50
+    //     if (totalCost > 50) {
+    //         totalCost *= 0.9;
+    //         alert(`A 10% discount has been applied to the order because it is more than $50. The new cost is $${totalCost.toFixed(2)}.`);
+    //     }
+    //     let items = users[userIndex].shoppingCart.items;
+    //     if (items.length > 0) {
+    //         history.push({ items, totalCost });
+    //         alert(`The order has been finished.`);
+    //     }
+
+    //     // Clear the shopping cart after completing the order
+    //     users[userIndex].shoppingCart.items = [];
+    //     users[userIndex].shoppingCart.totalCost = 0;
+    //     return users;
+
     // }
 
-    // applyDiscount(discount) {
-    //     this.totalCost -= discount;
-    // }
+    placeOrder(userIndex,users,products){
+    let totalCost = 0;
+    let requiredProducts = users[userIndex].shoppingCart.items;
+    let productsToRemove = [];
+    let orders = users[userIndex].orders;
+
+    console.log("orders",orders);
+
+    for (let i = 0; i < requiredProducts.length; i++) {
+        const item = requiredProducts[i];
+        const productId = item.product.id;
+        const requiredQuantity = item.requiredQuantity;
+        const productIndex = products.findIndex(product => product.id === productId);
+
+        if (productIndex === -1 || products[productIndex].isOnSale === "No" || requiredQuantity > products[productIndex].quantity) {
+            // If the product is not available or its quantity exceeds the available stock, mark it for removal
+            productsToRemove.push(item);
+            alert(`${item.product.name} is not available in the store or its quantity exceeds the available stock. It will be removed from the order.`);
+        } else {
+            const product = products[productIndex];
+            // Update the product quantity and total cost based on the updated quantity
+            product.quantity -= requiredQuantity;
+            totalCost += product.price * requiredQuantity;
+        }
+    }
+    // Remove products marked for removal
+    for (let product of productsToRemove) {
+        const index = requiredProducts.findIndex(item => item.product.id === product.product.id);
+        users[userIndex].shoppingCart.items.splice(index, 1);
+    }
+
+    // If there are items remaining in the shopping cart, add the order to history
+    if (users[userIndex].shoppingCart.items.length > 0) {
+        console.log(11);
+        console.log(orders);
+        orders.push({items:users[userIndex].shoppingCart.items,totalCost});
+
+        alert(`The order has been finished.`);
+    } else {
+        alert("There are no products in the Shopping Cart anymore!");
+    }
+
+    // Clear the shopping cart after completing the order
+    users[userIndex].shoppingCart.items = [];
+    users[userIndex].shoppingCart.totalCost = 0;
+
+    return users;
+    }
+    
+    displayHistory(users,userIndex){
+        // let orderHistory = users[userIndex].shoppingCart.history;
+        let orders = users[userIndex].orders;
+        console.log(orders);
+        let alertMessage = "Order History:\n";
+        if (orders.length == 0) {
+            alert("There is no order in the history yet! \nMake an order to see this special feature")
+        }
+        for (let i = 0; i < orders.length; i++) {
+            const order = orders[i];
+            alertMessage += `Order ${i + 1}:\n`;
+            for (let j = 0; j < order.items.length; j++) {
+                const item = order.items[j];
+                alertMessage += `Product: ${item.product.name}\n`;
+                alertMessage += `Required Quantity: ${item.requiredQuantity}\n`;
+            }
+            alertMessage += `Total Cost of Order ${i + 1}: $${order.totalCost}\n`;
+        }
+
+        alert(alertMessage);
+    }
+    
 
 }
-// promptAdminActions();
-// promptUserActions()
-// getUsersFromLocalStorage();
-// createUserAccount();
-// viewAccountDetailsUser() ;
-// deleteUser();
-// addProductToCart();
-// removeItemFromCart();
-// updateQuantityInCart();
-// promptLoginOrSignup();
+
 function areItemsAvailable(items) {
     return items && items.length > 0;
 }
